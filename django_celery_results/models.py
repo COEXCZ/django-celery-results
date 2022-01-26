@@ -1,7 +1,6 @@
 """Database models."""
 
 import json
-import importlib
 
 from celery import states
 from celery.result import GroupResult as CeleryGroupResult
@@ -10,7 +9,7 @@ from django.conf import settings
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from . import managers
+from . import managers, utils
 
 ALL_STATES = sorted(states.ALL_STATES)
 TASK_STATE_CHOICES = sorted(zip(ALL_STATES, ALL_STATES))
@@ -122,8 +121,8 @@ class TaskResult(models.Model):
         return '<Task: {0.task_id} ({0.status})>'.format(self)
 
     def get_task(self):
-        celery = importlib.import_module(settings.CELERY_APP_MODULE)
-        return celery.app.signature(self.task_name)
+        celery_app = utils.get_celery_app()
+        return celery_app.signature(self.task_name)
 
     def get_args(self):
         return json.loads(self.task_args)
