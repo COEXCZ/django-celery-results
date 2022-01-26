@@ -98,6 +98,12 @@ class TaskResultAdmin(admin.ModelAdmin):
                 field.name for field in self.opts.local_fields
             })
 
+    def has_change_permission(self, request, obj=None):
+        return ALLOW_EDITS
+
+    def has_add_permission(self, request):
+        return ALLOW_EDITS
+
 
 admin.site.register(TaskResult, TaskResultAdmin)
 
