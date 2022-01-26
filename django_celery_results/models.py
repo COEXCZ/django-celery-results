@@ -1,6 +1,7 @@
 """Database models."""
 
 import json
+import importlib
 
 from celery import states
 from celery.result import GroupResult as CeleryGroupResult
@@ -119,6 +120,34 @@ class TaskResult(models.Model):
 
     def __str__(self):
         return '<Task: {0.task_id} ({0.status})>'.format(self)
+
+    def get_task(self):
+        celery = importlib.import_module(settings.CELERY_APP_MODULE)
+        return celery.app.signature(self.task_name)
+
+    def get_args(self):
+        return json.loads(self.task_args)
+
+    def get_kwargs(self):
+        return json.loads(self.task_kwargs)
+
+    def _reapply_task(self, _async: bool = True, priority: int = None):
+        task = self.get_task()
+        args = self.get_args()
+        kwargs = self.get_kwargs()
+        opts = {}
+        if _async:
+            if priority is not None:
+                opts['priority'] = priority
+            return task.apply_async(args=args, kwargs=kwargs, **opts)
+        else:
+            return task.apply(args=args, kwargs=kwargs, **opts)
+
+    def reapply_async(self, priority: int = None):
+        return self._reapply_task(priority=priority)
+
+    def reapply(self):
+        return self._reapply_task(_async=False)
 
 
 class ChordCounter(models.Model):

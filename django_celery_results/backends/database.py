@@ -44,20 +44,25 @@ class DatabaseBackend(BaseDictBackend):
         periodic_task_name = properties.get('periodic_task_name', None)
         worker = getattr(request, 'hostname', None)
 
-        # Get input arguments
-        if getattr(request, 'argsrepr', None) is not None:
-            # task protocol 2
-            task_args = request.argsrepr
-        else:
-            # task protocol 1
-            task_args = getattr(request, 'args', None)
+        # TODO: remove this and uncomment below when issue in parent repo is resolved
+        #    https://github.com/celery/django-celery-results/issues/239
+        task_args = getattr(request, 'args', None)
+        task_kwargs = getattr(request, 'kwargs', None)
 
-        if getattr(request, 'kwargsrepr', None) is not None:
-            # task protocol 2
-            task_kwargs = request.kwargsrepr
-        else:
-            # task protocol 1
-            task_kwargs = getattr(request, 'kwargs', None)
+        # # Get input arguments
+        # if getattr(request, 'argsrepr', None) is not None:
+        #     # task protocol 2
+        #     task_args = request.argsrepr
+        # else:
+        #     # task protocol 1
+        #     task_args = getattr(request, 'args', None)
+        #
+        # if getattr(request, 'kwargsrepr', None) is not None:
+        #     # task protocol 2
+        #     task_kwargs = request.kwargsrepr
+        # else:
+        #     # task protocol 1
+        #     task_kwargs = getattr(request, 'kwargs', None)
 
         # Encode input arguments
         if task_args is not None:
