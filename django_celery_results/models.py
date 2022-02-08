@@ -10,8 +10,9 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from . import managers, utils
+from . import choices
 
-ALL_STATES = sorted(states.ALL_STATES)
+ALL_STATES = sorted(choices.ALL_STATES)
 TASK_STATE_CHOICES = sorted(zip(ALL_STATES, ALL_STATES))
 
 
@@ -135,6 +136,8 @@ class TaskResult(models.Model):
         args = self.get_args()
         kwargs = self.get_kwargs()
         opts = {}
+        self.status = choices.RERUNNED
+        self.save()
         if _async:
             if priority is not None:
                 opts['priority'] = priority
